@@ -131,3 +131,14 @@ int darr_find(darr_t *da, void *value, compfun_t compare) {
 
   return -1;
 }
+
+void darr_destroy(darr_t *da) {
+  if (da == NULL)
+    return;
+
+  for (size_t i = 0; i < da->_size; ++i)
+    free(da->_arr[i]);
+
+  free(da->_arr);
+  free(da);
+}
