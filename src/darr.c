@@ -20,8 +20,8 @@ void *darr_at(darr_t *da, size_t index) {
   return index >= da->_size ? NULL : da->_arr[index];
 }
 
-bool _increase_darr(darr_t *da, size_t const index) {
-  if (index + 1 <= da->_capacity)
+bool _increase_darr(darr_t *da) {
+  if (da->_size + 1 <= da->_capacity)
     return true;
 
   __auto_type new_capacity =
@@ -33,7 +33,7 @@ bool _increase_darr(darr_t *da, size_t const index) {
   void *temp = realloc(da->_arr, sizeof(void *) * new_capacity);
 
   if (temp == NULL) {
-    fprintf(stderr, "darr_push(): realocation failed");
+    fprintf(stderr, "_increase_darr(): realocation failed\n");
 
     return false;
   }
@@ -47,11 +47,45 @@ bool _increase_darr(darr_t *da, size_t const index) {
 int darr_push(darr_t *da, void *value) {
   size_t const index = da->_size;
 
-  if (!_increase_darr(da, index))
+  if (!_increase_darr(da))
     return -1;
 
   da->_arr[index] = value;
   ++da->_size;
+
+  return index;
+}
+
+bool _shrink_darr(darr_t *da) {
+  if ((float)da->_size - 1 >=
+      (float)da->_capacity / DARR_DEFAULT_GROWING_FACTOR)
+    return true;
+
+  da->_capacity = da->_size;
+
+  void *temp = realloc(da->_arr, sizeof(void *) * da->_capacity + 1);
+
+  if (temp == NULL) {
+    fprintf(stderr, "_shrink_darr(): realocation failed\n");
+
+    return false;
+  }
+
+  da->_arr = temp;
+
+  return true;
+}
+
+int darr_pop(darr_t *da) {
+  if (da->_size == 0)
+    return -1;
+
+  size_t const index = da->_size - 1;
+
+  --da->_size;
+
+  if (!_shrink_darr(da))
+    return -1;
 
   return index;
 }
