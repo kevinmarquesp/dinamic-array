@@ -1,4 +1,5 @@
 #include "darr.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,4 +122,12 @@ int darr_delete_at(darr_t *da, size_t index) {
   --da->_size;
 
   return index;
+}
+
+int darr_find(darr_t *da, void *value, compfun_t compare) {
+  for (size_t i = 0; i < da->_size; ++i)
+    if (compare(da->_arr[i], value))
+      return i;
+
+  return -1;
 }

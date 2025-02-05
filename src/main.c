@@ -11,6 +11,7 @@
 void dbg_print_array(darr_t *darr);
 void dbg_push_catalog(darr_t *darr);
 void dbg_pop_catalog(darr_t *darr);
+bool compare(void const *curr, void const *value);
 
 int main(void) {
   darr_t *darr = darr_new();
@@ -30,7 +31,14 @@ int main(void) {
 
   dbg_print_array(darr);
 
+  __auto_type index = darr_find(darr, &(T){50}, compare);
+  printf("[dbg] Found 45 in: %i\n", index);
+
   return 0;
+}
+
+bool compare(void const *curr, void const *value) {
+  return *(T *)curr == *(T *)value;
 }
 
 void dbg_print_array(darr_t *darr) {

@@ -7,6 +7,8 @@
 #define DARR_DEFAULT_CAPACITY 2
 #define DARR_DEFAULT_GROWING_FACTOR 1.25f
 
+typedef bool(compfun_t)(void const *curr, void const *value);
+
 typedef struct darr_t {
   void **_arr;
   size_t _capacity, _size;
@@ -20,6 +22,6 @@ int darr_push(darr_t *da, void *value);
 int darr_pop(darr_t *da);
 int darr_insert_at(darr_t *da, size_t index, void *value);
 int darr_delete_at(darr_t *da, size_t index);
-/* int darr_find(darr_t *da, void *value); */
+int darr_find(darr_t *da, void *value, compfun_t compare);
 
 #endif // DARR_H
