@@ -1,6 +1,8 @@
 #include "darr.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 
 darr_t *darr_new(void) {
   darr_t *da = malloc(sizeof(darr_t));
@@ -86,6 +88,37 @@ int darr_pop(darr_t *da) {
 
   if (!_shrink_darr(da))
     return -1;
+
+  return index;
+}
+
+int darr_insert_at(darr_t *da, size_t index, void *value) {
+  if (index >= da->_size)
+    return -1;
+
+  if (!_increase_darr(da))
+    return -1;
+
+  memmove(&da->_arr[index + 1], &da->_arr[index],
+          sizeof(void *) * (da->_size - index));
+
+  da->_arr[index] = value;
+  ++da->_size;
+
+  return index;
+}
+
+int darr_delete_at(darr_t *da, size_t index) {
+  if (index >= da->_size)
+    return -1;
+
+  memmove(&da->_arr[index], &da->_arr[index + 1],
+          sizeof(void *) * (da->_size - index));
+
+  if (!_shrink_darr(da))
+    return -1;
+
+  --da->_size;
 
   return index;
 }
