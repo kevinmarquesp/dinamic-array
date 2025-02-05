@@ -23,6 +23,6 @@ int darr_pop(darr_t *da);
 int darr_insert_at(darr_t *da, size_t index, void *value);
 int darr_delete_at(darr_t *da, size_t index);
 int darr_find(darr_t *da, void *value, compfun_t compare);
-void darr_destroy(darr_t *da);
+void darr_destroy(darr_t *da, bool freeall);
 
 #endif // DARR_H

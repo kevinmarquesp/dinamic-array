@@ -61,7 +61,8 @@ int darr_push(darr_t *da, void *value) {
 
 bool _shrink_darr(darr_t *da) {
   if ((float)da->_size - 1 >=
-      (float)da->_capacity / DARR_DEFAULT_GROWING_FACTOR)
+          (float)da->_capacity / DARR_DEFAULT_GROWING_FACTOR ||
+      da->_capacity <= DARR_DEFAULT_CAPACITY)
     return true;
 
   da->_capacity = da->_size;
@@ -94,7 +95,7 @@ int darr_pop(darr_t *da) {
 }
 
 int darr_insert_at(darr_t *da, size_t index, void *value) {
-  if (index >= da->_size)
+  if (index > da->_size)
     return -1;
 
   if (!_increase_darr(da))
@@ -132,13 +133,17 @@ int darr_find(darr_t *da, void *value, compfun_t compare) {
   return -1;
 }
 
-void darr_destroy(darr_t *da) {
+void darr_destroy(darr_t *da, bool freeall) {
   if (da == NULL)
     return;
 
-  for (size_t i = 0; i < da->_size; ++i)
-    free(da->_arr[i]);
+  if (freeall)
+    for (size_t i = 0; i < da->_size; ++i)
+      if (da->_arr[i] != NULL)
+        free(da->_arr[i]);
 
-  free(da->_arr);
+  if (da->_arr != NULL)
+    free(da->_arr);
+
   free(da);
 }
