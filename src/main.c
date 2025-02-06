@@ -7,24 +7,52 @@
 #include <time.h>
 
 /* #define T char */
-#define T short
+/* #define T short */
 /* #define T int */
 /* #define T long */
-/* #define T float */
+#define T float
 /* #define T double */
 
+void test_staticness(void);
 void test_basic_operations(void);
 bool compare(void const *curr, void const *value);
 void test_edge_cases(void);
 void test_large_array(void);
 
 int main(void) {
+  test_staticness();
   test_basic_operations();
   test_edge_cases();
   test_large_array();
 
   puts("\nAll tests passed!");
+
   return 0;
+}
+
+// Test if the element pointers is easely changed
+void test_staticness(void) {
+  __auto_type darr = darr_new();
+
+  T a = 12;
+
+  darr_push(darr, &a, sizeof(T));
+
+  a = 13;
+
+  assert(*(T *)darr_at(darr, 0) == 12);
+
+  T *b = malloc(sizeof(T));
+  *b = 21;
+
+  darr_push(darr, b, sizeof(T));
+  free(b);
+
+  assert(*(T *)darr_at(darr, 1) == 21);
+
+  // Clean up
+  darr_destroy(darr);
+  printf("{test_staticness}\t passed!\n");
 }
 
 // Test function for basic operations
@@ -38,9 +66,9 @@ void test_basic_operations(void) {
 
   // Test push
   T value1 = 10, value2 = 20, value3 = 30;
-  assert(darr_push(darr, &value1) == 0); // First element at index 0
-  assert(darr_push(darr, &value2) == 1); // Second element at index 1
-  assert(darr_push(darr, &value3) == 2); // Third element at index 2
+  assert(darr_push(darr, &value1, sizeof(T)) == 0); // First element at index 0
+  assert(darr_push(darr, &value2, sizeof(T)) == 1); // Second element at index 1
+  assert(darr_push(darr, &value3, sizeof(T)) == 2); // Third element at index 2
 
   // Test size and capacity after pushes
   assert(darr_get_size(darr) == 3);
@@ -59,7 +87,7 @@ void test_basic_operations(void) {
 
   // Test insert_at
   T value4 = 15;
-  assert(darr_insert_at(darr, 1, &value4) == 1); // Insert at index 1
+  assert(darr_insert_at(darr, 1, &value4, sizeof(T)) == 1); // Insert at index 1
   assert(darr_get_size(darr) == 3);
   assert(*(T *)darr_at(darr, 1) == value4); // Check inserted value
   assert(*(T *)darr_at(darr, 2) == value2); // Check shifted value
@@ -75,7 +103,7 @@ void test_basic_operations(void) {
   assert(darr_find(darr, &value3, compare) == -1); // value3 was popped
 
   // Clean up
-  darr_destroy(darr, false);
+  darr_destroy(darr);
   printf("{test_basic_operations}\t passed!\n");
 }
 
@@ -89,13 +117,13 @@ void test_edge_cases() {
   darr_t *darr = darr_new();
 
   // Test empty array
-  assert(darr_pop(darr) == -1);                    // Pop from empty array
-  assert(darr_delete_at(darr, 0) == -1);           // Delete from empty array
-  assert(darr_insert_at(darr, 1, &(T){10}) == -1); // Insert out of bounds
+  assert(darr_pop(darr) == -1);          // Pop from empty array
+  assert(darr_delete_at(darr, 0) == -1); // Delete from empty array
+  assert(darr_insert_at(darr, 1, &(T){10}, sizeof(T)) == -1);
 
   // Test inserting at the end
-  assert(darr_insert_at(darr, 0, &(T){10}) == 0); // Insert at index 0
-  assert(darr_insert_at(darr, 1, &(T){20}) == 1); // Insert at index 1
+  assert(darr_insert_at(darr, 0, &(T){10}, sizeof(T)) == 0);
+  assert(darr_insert_at(darr, 1, &(T){20}, sizeof(T)) == 1);
 
   // Test deleting the only element
   assert(darr_delete_at(darr, 0) == 0); // Delete at index 0
@@ -103,7 +131,7 @@ void test_edge_cases() {
   assert(*(T *)darr_at(darr, 0) == 20); // Check remaining element
 
   // Clean up
-  darr_destroy(darr, false);
+  darr_destroy(darr);
   printf("{test_edge_cases}\t passed!\n");
 }
 
@@ -118,7 +146,9 @@ void test_large_array() {
 
     *value = i;
 
-    assert(darr_push(darr, value) == (int)i);
+    assert(darr_push(darr, value, sizeof(T)) == (int)i);
+
+    free(value);
   }
 
   // Check size and capacity
@@ -138,6 +168,6 @@ void test_large_array() {
   assert(darr_get_capacity(darr) == DARR_DEFAULT_CAPACITY);
 
   // Clean up
-  darr_destroy(darr, false);
+  darr_destroy(darr);
   printf("{test_large_array}\t passed!\n");
 }

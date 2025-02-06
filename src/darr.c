@@ -47,13 +47,17 @@ bool _increase_darr(darr_t *da) {
   return true;
 }
 
-int darr_push(darr_t *da, void *value) {
+int darr_push(darr_t *da, void *value, size_t size) {
   size_t const index = da->_size;
 
   if (!_increase_darr(da))
     return -1;
 
-  da->_arr[index] = value;
+  void *copy = malloc(size);
+
+  memcpy(copy, value, size);
+
+  da->_arr[index] = copy;
   ++da->_size;
 
   return index;
@@ -86,6 +90,8 @@ int darr_pop(darr_t *da) {
 
   size_t const index = da->_size - 1;
 
+  free(da->_arr[index]);
+
   --da->_size;
 
   if (!_shrink_darr(da))
@@ -94,7 +100,7 @@ int darr_pop(darr_t *da) {
   return index;
 }
 
-int darr_insert_at(darr_t *da, size_t index, void *value) {
+int darr_insert_at(darr_t *da, size_t index, void *value, size_t size) {
   if (index > da->_size)
     return -1;
 
@@ -104,7 +110,11 @@ int darr_insert_at(darr_t *da, size_t index, void *value) {
   memmove(&da->_arr[index + 1], &da->_arr[index],
           sizeof(void *) * (da->_size - index));
 
-  da->_arr[index] = value;
+  void *copy = malloc(size);
+
+  memcpy(copy, value, size);
+
+  da->_arr[index] = copy;
   ++da->_size;
 
   return index;
@@ -113,6 +123,8 @@ int darr_insert_at(darr_t *da, size_t index, void *value) {
 int darr_delete_at(darr_t *da, size_t index) {
   if (index >= da->_size)
     return -1;
+
+  free(da->_arr[index]);
 
   memmove(&da->_arr[index], &da->_arr[index + 1],
           sizeof(void *) * (da->_size - index));
@@ -133,14 +145,13 @@ int darr_find(darr_t *da, void *value, compfun_t compare) {
   return -1;
 }
 
-void darr_destroy(darr_t *da, bool freeall) {
+void darr_destroy(darr_t *da) {
   if (da == NULL)
     return;
 
-  if (freeall)
-    for (size_t i = 0; i < da->_size; ++i)
-      if (da->_arr[i] != NULL)
-        free(da->_arr[i]);
+  for (size_t i = 0; i < da->_size; ++i)
+    if (da->_arr[i] != NULL)
+      free(da->_arr[i]);
 
   if (da->_arr != NULL)
     free(da->_arr);

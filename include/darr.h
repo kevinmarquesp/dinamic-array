@@ -18,11 +18,11 @@ darr_t *darr_new(void);
 size_t darr_get_size(darr_t *da);
 size_t darr_get_capacity(darr_t *da);
 void *darr_at(darr_t *da, size_t index);
-int darr_push(darr_t *da, void *value);
+int darr_push(darr_t *da, void *value, size_t size);
 int darr_pop(darr_t *da);
-int darr_insert_at(darr_t *da, size_t index, void *value);
+int darr_insert_at(darr_t *da, size_t index, void *value, size_t size);
 int darr_delete_at(darr_t *da, size_t index);
 int darr_find(darr_t *da, void *value, compfun_t compare);
-void darr_destroy(darr_t *da, bool freeall);
+void darr_destroy(darr_t *da);
 
 #endif // DARR_H
