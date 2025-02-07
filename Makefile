@@ -7,10 +7,15 @@ TARGET := prog.out
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
-all: $(TARGET) run
+DOXYGEN := doxygen
+HTML := html
+
+all: init $(TARGET) run
+
+init:
+	@mkdir -vp $(BUILD_DIR)
 
 $(TARGET): $(OBJS)
-	mkdir -vp $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -19,5 +24,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 run: $(TARGET)
 	@./$<
 
+.PHONY: html
+html:
+	$(DOXYGEN)
+
 clean:
-	rm -f $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(HTML)
